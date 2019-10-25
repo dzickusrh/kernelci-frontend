@@ -634,8 +634,7 @@ require([
         var bootLog;
         var bootTime;
         var branch;
-        var compiler;
-        var compilerVersion;
+        var buildEnvironment;
         var compilerVersionFull;
         var createdOn;
         var crossCompile;
@@ -694,8 +693,7 @@ require([
         qemuCommand = result.qemu_command;
         soc = result.mach;
 
-        compiler = result.compiler;
-        compilerVersion = result.compiler_version;
+        buildEnvironment = result.build_environment;
         compilerVersionFull = result.compiler_version_full;
         crossCompile = result.cross_compile;
 
@@ -1003,23 +1001,13 @@ require([
                 html.nonavail());
         }
 
-        if (compiler) {
+        if (buildEnvironment) {
             html.replaceContent(
-                document.getElementById('compiler'),
-                document.createTextNode(compiler));
+                document.getElementById('build-environment'),
+                document.createTextNode(buildEnvironment));
         } else {
             html.replaceContent(
-                document.getElementById('compiler'), html.nonavail());
-        }
-
-        if (compilerVersion) {
-            html.replaceContent(
-                document.getElementById('compiler-version'),
-                document.createTextNode(compilerVersion));
-        } else {
-            html.replaceContent(
-                document.getElementById('compiler-version'),
-                html.nonavail());
+                document.getElementById('build-environment'), html.nonavail());
         }
 
         if (compilerVersionFull) {
