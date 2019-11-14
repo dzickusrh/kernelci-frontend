@@ -317,8 +317,7 @@ require([
         var buildModulesSize;
         var buildPlatform;
         var buildTime;
-        var compiler;
-        var compilerVersion;
+        var buildEnvironment;
         var compilerVersionFull;
         var configFragments;
         var createdOn;
@@ -404,8 +403,7 @@ require([
             buildLogSize = results.build_log_size;
             buildPlatform = results.build_platform;
             fileServerURL = results.file_server_url;
-            compiler = results.compiler;
-            compilerVersion = results.compiler_version;
+            buildEnvironment = results.build_environment;
             compilerVersionFull = results.compiler_version_full;
             crossCompile = results.cross_compile;
             vmlinuxFileSize = results.vmlinux_file_size;
@@ -588,23 +586,13 @@ require([
                     html.nonavail());
             }
 
-            if (compiler) {
+            if (buildEnvironment) {
                 html.replaceContent(
-                    document.getElementById('compiler'),
-                    document.createTextNode(compiler));
+                    document.getElementById('build-environment'),
+                    document.createTextNode(buildEnvironment));
             } else {
                 html.replaceContent(
-                    document.getElementById('compiler'), html.nonavail());
-            }
-
-            if (compilerVersion) {
-                html.replaceContent(
-                    document.getElementById('compiler-version'),
-                    document.createTextNode(compilerVersion));
-            } else {
-                html.replaceContent(
-                    document.getElementById('compiler-version'),
-                    html.nonavail());
+                    document.getElementById('build-environment'), html.nonavail());
             }
 
             if (compilerVersionFull) {
