@@ -3,8 +3,10 @@
  * Author: Matt Hart <matthew.hart@linaro.org>
  * Author: Milo Casagrande <milo.casagrande@linaro.org>
  *
- * kernelci dashboard.
+ * Copyright (C) Collabora Limited 2019
+ * Author: Alexandra Pereira <alexandra.pereira@collabora.com>
  * 
+ * kernelci dashboard.
  * 
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -348,8 +350,12 @@ define([
                 tooltipNode.setAttribute('title', 'More info');
             }
 
-            aNode = document.createElement('a');
-            aNode.setAttribute('href', href);
+            if (href) {
+                aNode = document.createElement('a');
+                aNode.setAttribute('href', href);
+            } else {
+                aNode = document.createElement('span');
+            }
 
             aNode.appendChild(html.search());
             tooltipNode.appendChild(aNode);
