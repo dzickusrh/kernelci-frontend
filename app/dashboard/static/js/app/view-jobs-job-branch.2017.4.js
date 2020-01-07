@@ -139,11 +139,11 @@ require([
         }
     }
 
-    function getBuildBootCountFail() {
+    function getBuildTestsCountFail() {
         html.replaceByClass('count-badge', '&infin;');
     }
 
-    function getBuildBootCountDone(response) {
+    function getBuildTestsCountDone(response) {
         var batchData;
 
         function parseBatchData(data) {
@@ -163,7 +163,7 @@ require([
             .search(gSearchFilter);
     }
 
-    function getBuildBootCount(response) {
+    function getBuildTestsCount(response) {
         var batchOps;
         var deferred;
         var kernel;
@@ -231,19 +231,19 @@ require([
                 query: qHead
             });
 
-            // Get total boot reports count.
-            opId = 'boot-total-count-';
+            // Get total tests count.
+            opId = 'tests-total-count-';
             opId += kernel;
             batchOps.push({
                 method: 'GET',
                 operation_id: opId,
                 resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: queryStr
             });
 
-            // Get successful boot reports count.
-            opId = 'boot-success-count-';
+            // Get successful tests count.
+            opId = 'tests-success-count-';
             opId += kernel;
             qHead = 'status=PASS&';
             qHead += queryStr;
@@ -251,33 +251,31 @@ require([
                 method: 'GET',
                 operation_id: opId,
                 resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: qHead
             });
 
-            // Get failed boot reports count.
-            opId = 'boot-fail-count-';
+            // Get regressions count.
+            opId = 'tests-fail-count-';
             opId += kernel;
-            qHead = 'status=FAIL&';
+            batchOps.push({
+                method: 'GET',
+                operation_id: opId,
+                resource: 'count',
+                document: 'test_regression',
+                query: qHead
+            });
+
+            // Get unknown test reports count.
+            opId = 'tests-unknown-count-';
+            opId += kernel;
+            qHead = 'status=FAIL&status=SKIP&regression_id=null&';
             qHead += queryStr;
             batchOps.push({
                 method: 'GET',
                 operation_id: opId,
                 resource: 'count',
-                document: 'boot',
-                query: qHead
-            });
-
-            // Get unknown boot reports count.
-            opId = 'boot-unknown-count-';
-            opId += kernel;
-            qHead = 'status=OFFLINE&status=UNTRIED&';
-            qHead += queryStr;
-            batchOps.push({
-                method: 'GET',
-                operation_id: opId,
-                resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: qHead
             });
         }
@@ -291,8 +289,8 @@ require([
                 '/_ajax/batch', JSON.stringify({batch: batchOps}));
 
             $.when(deferred)
-                .fail(e.error, getBuildBootCountFail)
-                .done(getBuildBootCountDone);
+                .fail(e.error, getBuildTestsCountFail)
+                .done(getBuildTestsCountDone);
         } else {
             html.replaceByClass('count-badge', '?');
         }
@@ -487,7 +485,7 @@ require([
             .fail(
                 e.error,
                 getBuildsFailed, getBuildsStatsFail, getBootStatsFail)
-            .done(getTrendsData, getBuildsDone, getBuildBootCount);
+            .done(getTrendsData, getBuildsDone, getBuildTestsCount);
     }
 
     function getDetailsDone(response) {
