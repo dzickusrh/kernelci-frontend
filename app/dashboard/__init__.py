@@ -2,9 +2,10 @@
 # Author: Matt Hart <matthew.hart@linaro.org>
 # Author: Milo Casagrande <milo.casagrande@linaro.org>
 #
-# Copyright (C) Collabora Limited 2018
+# Copyright (C) Collabora Limited 2018,2019
 # Author: Ana Guerrero Lopez <ana.guerrero@collabora.com>
 # Author: Guillaume Tucker <guillaume.tucker@collabora.com>
+# Author: Alexandra Pereira <alexandra.pereira@collabora.com>
 #
 # Copyright (C) Foundries.io 2017
 # Author: Milo Casagrande <milo@opensourcefoundries.com>
