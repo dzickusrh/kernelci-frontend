@@ -53,6 +53,7 @@ require([
         'git_branch',
         'job',
         'kernel',
+        'build_environment',
         'lab_name',
         'status'
     ];
@@ -200,6 +201,12 @@ require([
                     title: 'Arch.',
                     type: 'string',
                     className: 'arch-column'
+                },
+                {
+                    data: 'build_environment',
+                    title: 'Compiler',
+                    type: 'string',
+                    className: 'build_environment-column'
                 },
                 {
                     data: 'lab_name',
