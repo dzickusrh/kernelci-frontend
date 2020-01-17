@@ -96,6 +96,7 @@ require.config({
             'app/view-tests-board-job': 'app/view-tests-board-job.2018.9',
             'app/view-tests-board-job-kernel': 'app/view-tests-board-job-kernel.2018.9',
             'app/view-tests-group-id': 'app/view-tests-group-id.2018.9',
+            'app/view-releases-all': 'app/view-releases-all.2018.07.30'
         }
     },
     shim: {
