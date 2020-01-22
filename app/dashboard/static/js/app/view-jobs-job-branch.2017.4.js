@@ -1,11 +1,8 @@
 /*!
- * Copyright (C) Linaro Limited 2017,2019
- * Author: Matt Hart <matthew.hart@linaro.org>
- * Author: Milo Casagrande <milo.casagrande@linaro.org>
- *
  * kernelci dashboard.
- * 
- * 
+ *
+ * Copyright (C) 2014, 2015, 2016, 2017  Linaro Ltd.
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 2.1 of the License, or (at your option)
@@ -142,11 +139,11 @@ require([
         }
     }
 
-    function getBuildBootCountFail() {
+    function getBuildTestsCountFail() {
         html.replaceByClass('count-badge', '&infin;');
     }
 
-    function getBuildBootCountDone(response) {
+    function getBuildTestsCountDone(response) {
         var batchData;
 
         function parseBatchData(data) {
@@ -166,7 +163,7 @@ require([
             .search(gSearchFilter);
     }
 
-    function getBuildBootCount(response) {
+    function getBuildTestsCount(response) {
         var batchOps;
         var deferred;
         var kernel;
@@ -234,19 +231,19 @@ require([
                 query: qHead
             });
 
-            // Get total boot reports count.
-            opId = 'boot-total-count-';
+            // Get total tests count.
+            opId = 'test-total-count-';
             opId += kernel;
             batchOps.push({
                 method: 'GET',
                 operation_id: opId,
                 resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: queryStr
             });
 
-            // Get successful boot reports count.
-            opId = 'boot-success-count-';
+            // Get successful tests count.
+            opId = 'test-success-count-';
             opId += kernel;
             qHead = 'status=PASS&';
             qHead += queryStr;
@@ -254,33 +251,31 @@ require([
                 method: 'GET',
                 operation_id: opId,
                 resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: qHead
             });
 
-            // Get failed boot reports count.
-            opId = 'boot-fail-count-';
+            // Get regressions count.
+            opId = 'test-fail-count-';
             opId += kernel;
-            qHead = 'status=FAIL&';
+            batchOps.push({
+                method: 'GET',
+                operation_id: opId,
+                resource: 'count',
+                document: 'test_regression',
+                query: queryStr
+            });
+
+            // Get unknown test reports count.
+            opId = 'test-unknown-count-';
+            opId += kernel;
+            qHead = 'status=FAIL&status=SKIP&regression_id=null&';
             qHead += queryStr;
             batchOps.push({
                 method: 'GET',
                 operation_id: opId,
                 resource: 'count',
-                document: 'boot',
-                query: qHead
-            });
-
-            // Get unknown boot reports count.
-            opId = 'boot-unknown-count-';
-            opId += kernel;
-            qHead = 'status=OFFLINE&status=UNTRIED&';
-            qHead += queryStr;
-            batchOps.push({
-                method: 'GET',
-                operation_id: opId,
-                resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: qHead
             });
         }
@@ -294,8 +289,8 @@ require([
                 '/_ajax/batch', JSON.stringify({batch: batchOps}));
 
             $.when(deferred)
-                .fail(e.error, getBuildBootCountFail)
-                .done(getBuildBootCountDone);
+                .fail(e.error, getBuildTestsCountFail)
+                .done(getBuildTestsCountDone);
         } else {
             html.replaceByClass('count-badge', '?');
         }
@@ -328,9 +323,9 @@ require([
 
             tooltipNode = html.tooltip();
             tooltipNode.setAttribute(
-                'title', 'Total/Successful/Failed/Other boot reports');
+                'title', 'Total/Successful/Regressions/Other results');
             tooltipNode.appendChild(
-                document.createTextNode('Boot Status'));
+                document.createTextNode('Test Results'));
 
             return tooltipNode.outerHTML;
         }
@@ -362,7 +357,7 @@ require([
         /**
          * Wrapper to provide the href.
         **/
-        function _renderBootCount(data, type) {
+        function _renderTestCount(data, type) {
             var href = '/boot/all/job/';
             href += gJobName;
             href += '/branch/';
@@ -370,7 +365,7 @@ require([
             href += '/kernel/';
             href += data;
             href += '/';
-            return jobt.renderBootCount({data: data, type: type, href: href});
+            return jobt.renderTestCount({data: data, type: type, href: href});
         }
 
         function _renderBuildCount(data, type) {
@@ -424,7 +419,7 @@ require([
                     title: _bootColumnTitle(),
                     type: 'string',
                     className: 'boot-count pull-center',
-                    render: _renderBootCount
+                    render: _renderTestCount
                 },
                 {
                     data: 'created_on',
@@ -490,7 +485,7 @@ require([
             .fail(
                 e.error,
                 getBuildsFailed, getBuildsStatsFail, getBootStatsFail)
-            .done(getTrendsData, getBuildsDone, getBuildBootCount);
+            .done(getTrendsData, getBuildsDone, getBuildTestsCount);
     }
 
     function getDetailsDone(response) {
