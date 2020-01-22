@@ -1,3 +1,6 @@
+# Copyright (C) Collabora Limited 2020
+# Author: Alexandra Pereira <alexandra.pereira@collabora.com>
+#
 # Copyright (C) Linaro Limited 2014,2015,2016,2017,2019
 # Author: Matt Hart <matthew.hart@linaro.org>
 # Author: Milo Casagrande <milo.casagrande@linaro.org>
@@ -32,6 +35,7 @@ import dashboard.views.index as vindex
 import dashboard.views.job as vjob
 import dashboard.views.soc as vsoc
 import dashboard.views.test as vtest
+import dashboard.views.release as vrelease
 
 import dashboard.utils.feed.job as jobfeed
 import dashboard.utils.feed.boot as bootfeed
@@ -392,3 +396,11 @@ def init():
         as_view("tests-board-job-kernel-view"),
         methods=["GET"]
     )
+
+    # Tests by build views.
+    add_rule(
+        "/test-build/",
+        view_func=vrelease.ReleasesAllView.as_view("release-all-view"),
+        methods=["GET"]
+    )
+
