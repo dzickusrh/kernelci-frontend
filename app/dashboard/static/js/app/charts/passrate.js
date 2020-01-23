@@ -1,8 +1,8 @@
 /*!
  * kernelci dashboard.
- * 
+ *
  * Copyright (C) 2014, 2015, 2016, 2017  Linaro Ltd.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 2.1 of the License, or (at your option)
@@ -101,6 +101,10 @@ define([
     function prepareGraph(response, settings) {
         var worker;
 
+        console.log("prepareGraph")
+        console.log(response)
+        console.log(settings)
+
         if (window.Worker) {
             worker = new Worker('/static/js/worker/count-status-rate.js');
 
@@ -111,7 +115,7 @@ define([
         }
     }
 
-    passrate.bootpassrate = function(element, response) {
+    passrate.testpassrate = function(element, response) {
         prepareGraph(response, {
             element: element,
             graphType: 'boot',
@@ -131,4 +135,3 @@ define([
 
     return passrate;
 });
-
