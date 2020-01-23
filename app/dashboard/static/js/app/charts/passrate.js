@@ -101,6 +101,10 @@ define([
     function prepareGraph(response, settings) {
         var worker;
 
+        console.log("prepareGraph")
+        console.log(response)
+        console.log(settings)
+
         if (window.Worker) {
             worker = new Worker('/static/js/worker/count-status-rate.js');
 
