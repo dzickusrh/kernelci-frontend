@@ -1,8 +1,8 @@
 /*!
  * kernelci dashboard.
- * 
+ *
  * Copyright (C) 2014, 2015, 2016, 2017  Linaro Ltd.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 2.1 of the License, or (at your option)
@@ -100,7 +100,7 @@ require([
     }
 
     function getBootsCountFail() {
-        html.replaceByClassHTML('boots-count-badge', '&infin;');
+        html.replaceByClassHTML('test-count-badge', '&infin;');
     }
 
     function getBootsCountDone(response) {
@@ -126,7 +126,7 @@ require([
                 gSocsTable.addDrawEvent(updateSocsTable);
             }
         } else {
-            html.replaceByClassTxt('boots-count-badge', '?');
+            html.replaceByClassTxt('test-count-badge', '?');
         }
     }
 
@@ -140,9 +140,9 @@ require([
             query += soc;
             batchOps.push({
                 method: 'GET',
-                operation_id: 'boots-count-' + soc,
+                operation_id: 'test-count-' + soc,
                 resource: 'count',
-                document: 'boot',
+                document: 'test_case',
                 query: query
             });
         }
@@ -315,7 +315,7 @@ require([
         }
 
         // Internal wrapper to provide the oreder count.
-        function _renderBootsCount(data, type) {
+        function _renderTestCount(data, type) {
             var rendered;
 
             rendered = null;
@@ -323,12 +323,12 @@ require([
                 rendered = tsoc.countBadge({
                     data: data,
                     type: 'default',
-                    idStart: 'boots-',
-                    extraClasses: ['boots-count-badge']
+                    idStart: 'test-',
+                    extraClasses: ['test-count-badge']
                 });
             } else if (type === 'sort') {
-                if (gBootsCount.hasOwnProperty('boots-count-' + data)) {
-                    rendered = gBootsCount['boots-count-' + data];
+                if (gBootsCount.hasOwnProperty('test-count-' + data)) {
+                    rendered = gBootsCount['test-count-' + data];
                 } else {
                     rendered = NaN;
                 }
@@ -391,11 +391,11 @@ require([
                 },
                 {
                     data: 'mach',
-                    title: 'Total Boot Reports',
+                    title: 'Total Test Results',
                     type: 'num',
                     searchable: false,
                     className: 'pull-center',
-                    render: _renderBootsCount
+                    render: _renderTestCount
                 },
                 {
                     data: 'mach',
@@ -464,7 +464,7 @@ require([
     function getSocs() {
         var deferred;
 
-        deferred = request.get('/_ajax/boot/distinct/mach/', {});
+        deferred = request.get('/_ajax/test/distinct/mach/', {});
         $.when(deferred)
             .fail(error.error, getSocsFail)
             .done(getSocsParse);
