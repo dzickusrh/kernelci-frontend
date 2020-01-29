@@ -358,7 +358,7 @@ require([
          * Wrapper to provide the href.
         **/
         function _renderTestCount(data, type) {
-            var href = '/boot/all/job/';
+            var href = '/test/job/';
             href += gJobName;
             href += '/branch/';
             href += gBranchName;
@@ -412,12 +412,16 @@ require([
                     title: _buildColumTitle(),
                     type: 'string',
                     className: 'build-count pull-center',
+                    orderable: false,
+                    searchable: false,
                     render: _renderBuildCount
                 },
                 {
                     data: 'kernel',
                     title: _testColumnTitle(),
                     type: 'string',
+                    orderable: false,
+                    searchable: false,
                     className: 'test-count pull-center',
                     render: _renderTestCount
                 },
