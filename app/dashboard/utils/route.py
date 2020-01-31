@@ -402,3 +402,12 @@ def init():
         as_view("test-job-branch-kernel"),
         methods=["GET"]
     )
+
+    add_rule(
+        (
+            "/test/cases/<string:plan>/"
+        ),
+        view_func=vtest.TestCaseFromPlan.
+        as_view("test-case-from-plan"),
+        methods=["GET"]
+    )
