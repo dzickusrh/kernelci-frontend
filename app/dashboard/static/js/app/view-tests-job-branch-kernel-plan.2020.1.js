@@ -168,6 +168,7 @@ require([
     }
 
     function getRegressionsDone(response) {
+        console.log("getRegressionsDone()");
         function parseBatchData(data) {
             var panelId = data.operation_id + '-panel';
             var statusId = data.operation_id + '-status';
@@ -182,6 +183,10 @@ require([
             statusNode = gPanel.createStatusNode(status);
             statusParent = document.getElementById(statusId);
             html.replaceContent(statusParent, statusNode);
+
+            console.log(data.operation_id);
+            console.log(status);
+            console.log(data.result[0]);
         }
 
         response.result.forEach(parseBatchData);
