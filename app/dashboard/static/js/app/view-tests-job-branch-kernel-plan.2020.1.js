@@ -231,6 +231,8 @@ require([
             var statusNode;
             var statusParent;
 
+            console.log("id: " + data.operation_id);
+
             status = (data.result[0].count == 0 ? "PASS" : "FAIL");
             panelNode = document.getElementById(panelId);
             gPanel.addFilterClass(panelNode, status);
@@ -261,10 +263,10 @@ require([
                 var testCase;
 
                 testCase = regr.test_case_path;
-
                 if (testCase.startsWith(gPlan)) {
                     testCase = testCase.substr(gPlan.length + 1);
                 }
+                console.log("test case: " + testCase);
 
                 regrInfo = document.createElement('dd');
                 if (regr.regressions.length == 2) {
