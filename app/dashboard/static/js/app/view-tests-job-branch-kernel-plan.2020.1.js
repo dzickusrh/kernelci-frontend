@@ -260,6 +260,10 @@ require([
                 var dtNode;
                 var testCase;
 
+                if (regr.device_type == 'qemu_x86_64') {
+                    console.log(regr);
+                }
+
                 testCase = regr.test_case_path;
 
                 if (testCase.startsWith(gPlan)) {
