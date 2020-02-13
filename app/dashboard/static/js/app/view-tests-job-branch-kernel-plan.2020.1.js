@@ -223,6 +223,7 @@ require([
     }
 
     function updateRegressions(results) {
+        console.log(results);
         function parseBatchData(data) {
             var panelId = data.operation_id + '-panel';
             var statusId = data.operation_id + '-status';
@@ -370,6 +371,9 @@ require([
             qStr += '&defconfig_full=' + result.defconfig_full;
 
             idStr = gPanel.createDataIndex(result);
+
+            console.log(idStr);
+            console.log(qStr);
 
             batchOps.push({
                 method: 'GET',
