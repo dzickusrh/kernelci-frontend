@@ -31,8 +31,9 @@ require([
     'tables/test',
     'charts/passpie',
     'components/test/view',
+    'URI',
 ], function($, init, html, filter, format, error, request, table,
-            testTable, pieChart, testView) {
+            testTable, pieChart, testView, URI) {
     'use strict';
     var gJob;
     var gBranch;
@@ -361,14 +362,16 @@ require([
             var qStr;
             var idStr;
 
-            qStr = 'job=' + result.job;
-            qStr += '&kernel=' + result.kernel;
-            qStr += '&git_branch=' + result.git_branch;
-            qStr += '&plan=' + result.name;
-            qStr += '&device_type=' + result.device_type;
-            qStr += '&lab_name=' + result.lab_name;
-            qStr += '&build_environment=' + result.build_environment;
-            qStr += '&defconfig_full=' + result.defconfig_full;
+            qStr = URI.buildQuery({
+                'job': result.job,
+                'kernel': result.kernel,
+                'git_branch': result.git_branch,
+                'plan': result.plan,
+                'device_type': result.device_type,
+                'lab_name': result.lab_name,
+                'build_environment': result.build_environment,
+                'defconfig_full': result.defconfig_full,
+            });
 
             idStr = gPanel.createDataIndex(result);
 
@@ -404,22 +407,27 @@ require([
     function getLabResults(results) {
         var batchOps;
         var deferred;
-        var qStr;
+        var params;
 
-        qStr = 'job=' + gJob;
-        qStr += '&kernel=' + gKernel;
-        qStr += '&git_branch=' + gBranch;
-        qStr += '&plan=' + gPlan;
+        params = {
+            'job': gJob,
+            'kernel': gKernel,
+            'git_branch': gBranch,
+            'plan': gPlan,
+        };
 
         function createBatchOp(lab) {
-            var qStrLab = qStr + '&lab_name=' + lab;
+            var qStr;
+
+            params['lab_name'] = lab;
+            qStr = URI.buildQuery(params);
 
             batchOps.push({
                 method: 'GET',
                 operation_id: [lab, 'total'],
                 resource: 'count',
                 document: 'test_case',
-                query: qStrLab,
+                query: qStr,
             });
 
             batchOps.push({
@@ -427,7 +435,7 @@ require([
                 operation_id: [lab, 'success'],
                 resource: 'count',
                 document: 'test_case',
-                query: qStrLab + '&status=PASS',
+                query: qStr + '&status=PASS',
             });
 
             batchOps.push({
@@ -435,7 +443,7 @@ require([
                 operation_id: [lab, 'regressions'],
                 resource: 'count',
                 document: 'test_regression',
-                query: qStrLab,
+                query: qStr,
             });
 
             batchOps.push({
@@ -443,7 +451,7 @@ require([
                 operation_id: [lab, 'unknown'],
                 resource: 'count',
                 document: 'test_case',
-                query: qStrLab + '&status=FAIL&status=SKIP&regression_id=null',
+                query: qStr + '&status=FAIL&status=SKIP&regression_id=null',
             });
         }
 
@@ -502,10 +510,12 @@ require([
         var batchOps;
         var deferred;
 
-        qStr = 'job=' + gJob;
-        qStr += '&kernel=' + gKernel;
-        qStr += '&git_branch=' + gBranch;
-        qStr += '&plan=' + gPlan;
+        qStr = URI.buildQuery({
+            'job': gJob,
+            'kernel':  gKernel,
+            'git_branch':  gBranch,
+            'plan':  gPlan,
+        });
 
         batchOps = []
 
