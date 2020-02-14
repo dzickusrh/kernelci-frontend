@@ -240,6 +240,10 @@ div.dataTables_filter {
     font-size: 88%;
     font-weight: normal;
 }
+.build-env-label {
+    font-size: 88%;
+    font-weight: normal;
+}
 .faq dt {
     margin-top: 15px;
 }
