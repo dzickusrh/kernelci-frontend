@@ -99,17 +99,6 @@ define([
 
             tooltipNode = html.tooltip();
             tooltipNode.setAttribute(
-                'title', 'Boot reports for tree &#171;' + gJob + '&#187;');
-            aNode = document.createElement('a');
-            aNode.setAttribute('href', '/boot/all/job/' + gJob + '/');
-            aNode.appendChild(html.boot());
-            tooltipNode.appendChild(aNode);
-
-            domNode.appendChild(tooltipNode);
-            domNode.insertAdjacentHTML('beforeend', '&nbsp;&dash;&nbsp;');
-
-            tooltipNode = html.tooltip();
-            tooltipNode.setAttribute(
                 'title', 'Details for tree &#171;' + gJob + '&#187;');
             aNode = document.createElement('a');
             aNode.setAttribute('href', '/job/' + gJob + '/');
@@ -129,19 +118,6 @@ define([
             domNode = document.createElement('div');
             domNode.appendChild(document.createTextNode(gKernel));
             domNode.insertAdjacentHTML('beforeend', '&nbsp;&mdash;&nbsp;');
-
-            tooltipNode = html.tooltip();
-            tooltipNode.setAttribute(
-                'title',
-                'Boot reports for &#171;' + gJob + '&#187; - ' + gKernel);
-            aNode = document.createElement('a');
-            aNode.setAttribute(
-                'href', '/boot/all/job/' + gJob + '/kernel/' + gKernel + '/');
-            aNode.appendChild(html.boot());
-            tooltipNode.appendChild(aNode);
-
-            domNode.appendChild(tooltipNode);
-            domNode.insertAdjacentHTML('beforeend', '&nbsp;&dash;&nbsp;');
 
             tooltipNode = html.tooltip();
             tooltipNode.setAttribute(
