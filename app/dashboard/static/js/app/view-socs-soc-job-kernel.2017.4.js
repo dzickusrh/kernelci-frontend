@@ -170,19 +170,12 @@ define([
                 document.getElementById('git-describe'), domNode);
 
             // Git URL.
-            if (gitURLs[0]) {
-                aNode = document.createElement('a');
-                aNode.setAttribute('href', gitURLs[0]);
-                aNode.appendChild(document.createTextNode(gitURL));
-                aNode.insertAdjacentHTML('beforeend', '&nbsp;');
-                aNode.appendChild(html.external());
-            } else {
-                if (gitURL && gitURL !== undefined) {
-                    aNode = document.createTextNode(gitURL);
-                } else {
-                    aNode = html.nonavail();
-                }
-            }
+            aNode = document.createElement('a');
+            aNode.setAttribute('href', gitURL);
+            aNode.appendChild(document.createTextNode(gitURL));
+            aNode.insertAdjacentHTML('beforeend', '&nbsp;');
+            aNode.appendChild(html.external());
+            
             html.replaceContent(document.getElementById('git-url'), aNode);
 
             // Git commit.
