@@ -138,6 +138,28 @@ require([
         var columns;
         var data;
 
+        function _renderMeasurements(measurements, type) {
+            var mesList;
+
+            if (type != "display")
+                return;
+
+            if (!measurements.length)
+                return "-";
+
+            mesList = document.createElement('ul');
+            mesList.className = 'measurements';
+
+            measurements.forEach(function(data) {
+                var mes = document.createElement('li');
+                var msg = data['value'] + " " + data['unit'];
+                mes.appendChild(document.createTextNode(msg));
+                mesList.appendChild(mes);
+            });
+
+            return mesList.outerHTML;
+        }
+
         function _renderStatus(data, type) {
             if (type == "display") {
                 var node = document.createElement('div');
@@ -151,6 +173,7 @@ require([
         data = [];
         results.forEach(function(item) {
             var status;
+            var measurements;
 
             if (item.status == 'PASS')
                 status = 'PASS';
@@ -160,9 +183,10 @@ require([
                 status = 'UNKNOWN';
 
             data.push({
-                'test_case_path': item.test_case_path,
-                'status': status,
                 '_id': item._id,
+                'test_case_path': item.test_case_path,
+                'measurements': item.measurements,
+                'status': status,
             });
         });
 
@@ -172,6 +196,15 @@ require([
                 data: 'test_case_path',
                 type: 'string',
                 className: 'test-group-column',
+            },
+            {
+                title: 'Measurements',
+                data: 'measurements',
+                type: 'string',
+                className: 'test-group-column',
+                searchable: false,
+                orderable: false,
+                render: _renderMeasurements,
             },
             {
                 title: 'Status',
