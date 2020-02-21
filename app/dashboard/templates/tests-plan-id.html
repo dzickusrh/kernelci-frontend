@@ -73,12 +73,26 @@
     </dl>
     </div>
 </div>
-<div id="other-details-div" class="row hidden"></div>
-<div id="multiple-sets" class="row">
-    <div class="page-header">
-        <h4>Test Results</h4>
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="page-header">
+            <h4>Test Results</h4>
+        </div>
+        <div id="table-loading" class="pull-center">
+            <small>
+                <i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                &nbsp;retrieving test data&hellip;
+            </small>
+        </div>
+    {%- if is_mobile %}
+        <div class="table-responsive" id="table-div">
+    {%- else %}
+        <div class="table" id="table-div">
+    {%- endif %}
+            <table class="table table-hover table-striped table-condensed clickable-table big-table" id="tests-table">
+            </table>
+        </div>
     </div>
-    {%- include "other-multiple-case-reports.html" %}
 </div>
 <input type="hidden" id="file-server" value='{{ config["FILE_SERVER_URL"] }}'>
 <input type="hidden" id="plan-id" value="{{ plan_id }}">
