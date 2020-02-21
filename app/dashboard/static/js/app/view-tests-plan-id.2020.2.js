@@ -140,6 +140,7 @@ require([
 
         function _addData(item) {
             var status;
+            var measurements;
 
             if (item.status == 'PASS')
                 status = 'PASS';
@@ -148,10 +149,30 @@ require([
             else
                 status = 'UNKNOWN';
 
+            if (item.measurements.length) {
+                var mesList;
+
+                mesList = document.createElement('ul');
+                mesList.className = 'measurements';
+
+                function _addMeasurement(data) {
+                    var mes = document.createElement('li');
+                    var msg = data['value'] + " " + data['unit'];
+                    mes.appendChild(document.createTextNode(msg));
+                    mesList.appendChild(mes);
+                }
+
+                item.measurements.forEach(_addMeasurement);
+                measurements = mesList.outerHTML;
+            } else {
+                measurements = '';
+            }
+
             data.push({
-                'test_case_path': item.test_case_path,
-                'status': status,
                 '_id': item._id,
+                'test_case_path': item.test_case_path,
+                'measurements': measurements,
+                'status': status,
             });
         }
 
@@ -172,6 +193,14 @@ require([
                 data: 'test_case_path',
                 type: 'string',
                 className: 'test-group-column',
+            },
+            {
+                title: 'Measurements',
+                data: 'measurements',
+                type: 'strings',
+                className: 'test-group-column',
+                searchable: false,
+                orderable: false,
             },
             {
                 title: 'Status',
