@@ -21,6 +21,7 @@
 
 require([
     'jquery',
+    'charts/passpie',
     'components/test/common',
     'tables/test',
     'utils/error',
@@ -29,7 +30,9 @@ require([
     'utils/request',
     'utils/table',
     'utils/urls',
-], function($, tcommon, ttable, error, init, html, request, table, urls) {
+    'URI',
+], function($, pieChart, tcommon, ttable, error, init, html, request, table,
+            urls, URI) {
     'use strict';
 
     var gPlanId;
@@ -132,6 +135,29 @@ require([
             document.getElementById('job-date'), dateNode);
         html.replaceContent(
             document.getElementById('job-log'), logNode);
+    }
+
+    function updateChart(response) {
+        function countTests(response) {
+            var results = response.result;
+            var total = results[0].result[0].count;
+            var pass = results[1].result[0].count;
+            var regressions = results[2].result[0].count;
+            var unknown = results[3].result[0].count;
+
+            return [total, [pass, regressions, unknown]];
+        }
+
+        pieChart.testpie({
+            element: 'test-chart',
+            countFunc: countTests,
+            response: response,
+            size: {
+                height: 140,
+                width: 140
+            },
+            radius: {inner: -12.5, outer: 0},
+        });
     }
 
     function updateTestsTable(results) {
@@ -262,6 +288,71 @@ require([
             .done(getTestsDone);
     }
 
+    function testCountFailed() {
+        /* The chart will not be shown */
+    }
+
+    function testCountDone(response) {
+        updateChart(response);
+    }
+
+    function getTestCount(results) {
+        var qStr;
+        var batchOps;
+        var deferred;
+
+        qStr = URI.buildQuery({
+            job: results.job,
+            kernel: results.kernel,
+            git_branch: results.git_branch,
+            plan: results.name,
+            device_type: results.device_type,
+            build_environment: results.build_environment,
+            defconfig_full: results.defconfig_full,
+        });
+
+        batchOps = []
+
+        batchOps.push({
+            method: 'GET',
+            operation_id: 'test-total-count',
+            resource: 'count',
+            document: 'test_case',
+            query: qStr,
+        });
+
+        batchOps.push({
+            method: 'GET',
+            operation_id: 'test-success-count',
+            resource: 'count',
+            document: 'test_case',
+            query: qStr + '&status=PASS',
+        });
+
+        batchOps.push({
+            method: 'GET',
+            operation_id: 'test-fail-count',
+            resource: 'count',
+            document: 'test_regression',
+            query: qStr,
+        });
+
+        batchOps.push({
+            method: 'GET',
+            operation_id: 'test-unknown-count',
+            resource: 'count',
+            document: 'test_case',
+            query: qStr + '&status=FAIL&status=SKIP&regression_id=null',
+        });
+
+        deferred = request.post(
+            '/_ajax/batch', JSON.stringify({batch: batchOps}));
+
+        $.when(deferred)
+            .fail(error.error, testCountFailed)
+            .done(testCountDone);
+    }
+
     function getPlanFailed() {
         detailsFailed();
     }
@@ -271,6 +362,7 @@ require([
 
         updateDetails(results);
         getTests(results);
+        getTestCount(results);
     }
 
     function getPlan() {
