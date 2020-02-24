@@ -271,6 +271,7 @@ require([
         var data;
         var deferred;
 
+        /* ToDo: store the top-level group ID in the test case docs instead */
         data = {
             arch: results.arch,
             build_environment: results.build_environment,
