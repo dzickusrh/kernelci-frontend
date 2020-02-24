@@ -315,6 +315,8 @@ require([
             plan: results.name,
         });
 
+        console.log("qStr: " + qStr);
+
         batchOps = []
 
         batchOps.push({
