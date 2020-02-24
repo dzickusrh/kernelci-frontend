@@ -152,6 +152,17 @@ require([
             element: 'test-chart',
             countFunc: countTests,
             response: response,
+            legend: true,
+            legendIds: {
+                'pass': '#show-pass',
+                'fail': '#show-fail',
+                'unknown': '#show-unknown',
+            },
+            legendTitles: {
+                'pass': 'Successful',
+                'fail': 'Regressions',
+                'unknown': 'Unknown',
+            },
             size: {
                 height: 200,
                 width: 200,
@@ -254,6 +265,23 @@ require([
             .draw();
     }
 
+    function listenForTableEvents() {
+        function _tableFilter(event) {
+            var id = event.target.parentElement.id;
+            var status = id.substring('show-'.length);
+
+            if (status == 'all')
+                status = '';
+
+            gTestsTable.table.column(2).search(status).draw();
+        }
+
+        ['pass', 'fail', 'unknown'].forEach(function(id) {
+            var ele = document.getElementById('show-' + id);
+            ele.addEventListener('click', _tableFilter, true);
+        });
+    }
+
     function getTestsFailed() {
         html.removeElement(document.getElementById('table-loading'));
         html.replaceContent(
@@ -269,6 +297,7 @@ require([
         }
 
         updateTestsTable(response.result);
+        listenForTableEvents();
     }
 
     function getTests(results) {
