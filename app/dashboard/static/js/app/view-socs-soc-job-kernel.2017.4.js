@@ -255,7 +255,7 @@ define([
             .columns(columns)
             .order([0, 'asc'])
             .rowURL('/soc/%(soc)s/job/%(job)s/kernel/%(kernel)s/plan/%(name)s/')
-            .rowURLElements(['job', 'git_branch', 'kernel', 'name'])
+            .rowURLElements(['soc', 'job', 'kernel', 'name'])
             .paging(false)
             .info(false)
             .draw();
@@ -413,6 +413,8 @@ define([
         getBatchCount(response.result);
         getBatchStatus(response.result);
 
+        gPlansTable
+            .search(gSearchFilter);
     }
 
     function getPlans() {
