@@ -189,6 +189,8 @@ require([
         var aNode;
         var arch;
         var archLabelNode;
+        var compiler;
+        var compilerLabelNode;
         var branch;
         var cls;
         var colNode;
@@ -280,6 +282,7 @@ require([
             job = result.job;
             kernel = result.kernel;
             arch = result.arch;
+            compiler = result.compiler + " " + result.compiler_version;
             fileServerURL = result.file_server_url;
             fileServerResource = result.file_server_resource;
             errorsCount = result.errors;
@@ -324,6 +327,15 @@ require([
                     document.createElement('span'));
                 archLabelNode.setAttribute('class', 'arch-label');
                 archLabelNode.appendChild(document.createTextNode(arch));
+            }
+
+            if (compiler !== null) {
+                hNode.insertAdjacentHTML(
+                    'beforeend', '&nbsp;&dash;&nbsp;');
+                compilerLabelNode = hNode.appendChild(
+                    document.createElement('span'));
+                compilerLabelNode.setAttribute('class', 'compiler-label');
+                compilerLabelNode.appendChild(document.createTextNode(compiler));
             }
 
             switch (status) {
