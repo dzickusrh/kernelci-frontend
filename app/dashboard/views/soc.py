@@ -105,9 +105,11 @@ class SocsSocJobKernelView(SocsGeneralView):
         kernel = kwargs["kernel"]
 
         body_title = (
-            "Details for Tree &#171;%s&#187; - %s" % (job, kernel))
+            "Details SoC &#171;%s&#187; for Tree &#171;%s&#187; - %s" % (soc, job, kernel))
         page_title = "%s SoC: %s - %s" % (soc, job, kernel)
         page_title = "%s &mdash; %s" % (self.PAGE_TITLE, page_title)
+
+        search_filter = get_search_parameters(request)
 
         return render_template(
             "socs-soc-job-kernel.html",
@@ -115,5 +117,6 @@ class SocsSocJobKernelView(SocsGeneralView):
             page_title=page_title,
             soc=soc,
             job=job,
-            kernel=kernel
+            kernel=kernel,
+            search_filter=search_filter[0]
         )
