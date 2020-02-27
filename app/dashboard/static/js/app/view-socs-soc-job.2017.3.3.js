@@ -1,6 +1,10 @@
 /*!
  * kernelci dashboard.
  *
+ * Copyright (C) 2020 Collabora Limited
+ * Author: Alexandra Pereira <alexandra.pereira@collabora.com>
+ * Author: Guillaume Tucker <guillaume.tucker@collabora.com>
+ * 
  * Copyright (C) 2014, 2015, 2016, 2017  Linaro Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it under
@@ -43,11 +47,13 @@ require([
     gBatchCountMissing = {};
 
     function updateCountDetail(result) {
-        html.replaceContent(
-            document.getElementById(result.operation_id),
-            document.createTextNode(
-                format.number(parseInt(result.result[0].count, 10)))
-        );
+        if (result.result.length > 0) {
+            html.replaceContent(
+                document.getElementById(result.operation_id),
+                document.createTextNode(
+                    format.number(parseInt(result.result[0].count, 10)))
+            );
+        }
     }
 
     function getDetailsDone(response) {
@@ -82,7 +88,6 @@ require([
             query: gQueryStr
         });
 
-        console.log("queryStr: " + gQueryStr)
         batchOps.push({
             method: 'GET',
             operation_id: 'labs-count',
@@ -244,8 +249,6 @@ require([
     function getTestsDone(response) {
         var columns,
             results;
-
-        console.log(response)
         // Internal wrapper for the filter.
         function _renderTestCount(data, type) {
             if (type === 'filter') {
@@ -343,7 +346,6 @@ require([
     function getTests() {
         var deferred;
 
-        console.log("soc: " + gSoc + ",  job: " + gJob);
         deferred = request.get(
             '/_ajax/test/case',
             {
