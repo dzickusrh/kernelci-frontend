@@ -1,6 +1,9 @@
 /*!
  * kernelci dashboard.
  * 
+ * Copyright (C) 2020 Collabora Limited
+ * Author: Alexandra Pereira <alexandra.pereira@collabora.com>
+ * 
  * Copyright (C) 2014, 2015, 2016, 2017  Linaro Ltd.
  * Copyright (c) 2017 BayLibre, SAS.
  * Author: Loys Ollivier <lollivier@baylibre.com>
@@ -28,251 +31,88 @@ require([
     'utils/table',
     'utils/html',
     'utils/const',
-    'tables/test'
+    'tables/test',
+    'URI'
 ], function(
         $,
-        init, format, error, request, table, html, appconst, ttest) {
+        init, format, error, request, table, html, appconst, ttest, URI) {
     'use strict';
 
     var gDateRange;
     var gSearchFilter;
     var gPageLen;
     var gTestsTable;
-    var gGroupsCount;
-    var gLabsCount;
-    var gBatchOpBase;
-    var gBatchCountMissing;
-    var gDrawEventBound;
 
     setTimeout(function() {
         document.getElementById('li-test').setAttribute('class', 'active');
     }, 15);
 
     gDateRange = appconst.MAX_DATE_RANGE;
-    gGroupsCount = {};
-    gLabsCount = {};
-    gBatchOpBase = 'board=';
-    gBatchCountMissing = {};
-    // Used to check if the table draw event function has already been bound.
-    // In order not to bind it multiple times.
-    gDrawEventBound = false;
 
-    function updateOrStageCount(opId, count) {
-        var element;
-
-        element = document.getElementById(opId);
-        // If we do not have the element in the DOM, it means dataTables has
-        // yet to add it.
-        if (element) {
-            html.replaceContent(
-                element, document.createTextNode(format.number(count)));
-
-            // Check if the data structure holding the data to update the
-            // elements still holds the element.
-            if (gBatchCountMissing.hasOwnProperty(opId)) {
-                delete gBatchCountMissing[opId];
-            }
-        } else {
-            // Store it in a dictionary for later access.
-            if (!gBatchCountMissing.hasOwnProperty(opId)) {
-                gBatchCountMissing[opId] = count;
+    function getBatchStatusDone(response) {
+        function parseBatchData(data) {
+            var node = document.getElementById(data.operation_id);
+            if (node != null){
+                var status = (data.result[0].count == 0 ? "PASS" : "FAIL");
+                node.appendChild(ttest.statusNode(status));
             }
         }
+        response.result.forEach(parseBatchData)
     }
 
-    /**
-     * Function to be bound to the draw event of the table.
-     * This is done to update dynamic elements that are not yet available
-     * in the DOM due to the derefer rendering of dataTables.
-    **/
-    function updateTestsTable() {
-        var key;
-
-        if (Object.keys(gBatchCountMissing).length > 0) {
-            for (key in gBatchCountMissing) {
-                if (gBatchCountMissing.hasOwnProperty(key)) {
-                    updateOrStageCount(key, gBatchCountMissing[key]);
-                }
-            }
-        }
+    function getBatchStatusFailed() {
+        console.log("getBatchStatusFailed()");
     }
 
-    function getLabsCountFail() {
-        html.replaceByClassHTML('labs-count-badge', '&infin;');
-    }
-
-    function getLabsCountDone(response) {
-        var results;
-
-        // Internally used to parse the results.
-        function _updateLabsCount(result) {
-            var count;
-            var opId;
-
-            count = parseInt(result.result[0].count, 10);
-            opId = result.operation_id;
-            gLabsCount[opId] = count;
-
-            updateOrStageCount(opId, count);
-        }
-
-        results = response.result;
-        if (results.length > 0) {
-            results.forEach(_updateLabsCount);
-            if (!gDrawEventBound) {
-                gDrawEventBound = true;
-                gTestsTable.addDrawEvent(updateTestsTable);
-            }
-        } else {
-            html.replaceByClassTxt('labs-count-badge', '?');
-        }
-    }
-
-    function getLabsCount(response) {
+    function getBatchStatus(results) {
         var batchOps;
         var deferred;
 
-        function createBatchOp(value) {
-            var group = value.board;
-            var query = gBatchOpBase;
+        function createBatchOp(result) {
+            var qStr;
+            var plan = result.testPlan.name;
 
-            query += group;
-            batchOps.push({
-                method: 'GET',
-                operation_id: 'labs-count-' + group,
-                resource: 'test_group',
-                distinct: 'lab_name',
-                query: query
+            qStr = URI.buildQuery({
+                'job': result.testPlan.job,
+                'kernel': result.testPlan.kernel,
+                'board': result.testPlan.board,
+                'plan': plan,
             });
-        }
 
-        if (response.length > 0) {
-            batchOps = [];
-            response.forEach(createBatchOp);
-
-            deferred = request.post(
-                '/_ajax/batch', JSON.stringify({batch: batchOps}));
-
-            $.when(deferred)
-                .fail(error.error, getLabsCountFail)
-                .done(getLabsCountDone);
-        }
-    }
-
-    function getGroupsCountFail() {
-        html.replaceByClassHTML('groups-count-badge', '&infin;');
-    }
-
-    function getGroupsCountDone(response) {
-        var results;
-
-        // Internally used to parse the results.
-        function _updateGroupsCount(result) {
-            var count;
-            var opId;
-
-            count = parseInt(result.result[0].count, 10);
-            opId = result.operation_id;
-            gGroupsCount[opId] = count;
-
-            updateOrStageCount(opId, count);
-        }
-
-        results = response.result;
-        if (results.length > 0) {
-            results.forEach(_updateGroupsCount);
-            if (!gDrawEventBound) {
-                gDrawEventBound = true;
-                gTestsTable.addDrawEvent(updateTestsTable);
-            }
-        } else {
-            html.replaceByClassTxt('groups-count-badge', '?');
-        }
-    }
-
-    function getGroupsCount(response) {
-        var batchOps;
-        var deferred;
-
-        function createBatchOp(value) {
-            var group = value.board;
-            var query = gBatchOpBase;
-
-            query += group;
+            /* Number of test case regressions */
             batchOps.push({
                 method: 'GET',
-                operation_id: 'groups-count-' + group,
+                operation_id: 'status-' +result.testPlan.board+'-'+result.testPlan.kernel,
                 resource: 'count',
-                document: 'test_group',
-                query: query
+                document: 'test_regression',
+                query: qStr,
             });
         }
 
-        if (response.length > 0) {
-            batchOps = [];
-            response.forEach(createBatchOp);
+        batchOps = [];
+        results.forEach(createBatchOp);
+        deferred = request.post(
+            '/_ajax/batch', JSON.stringify({batch: batchOps}));
 
-            deferred = request.post(
-                '/_ajax/batch', JSON.stringify({batch: batchOps}));
-
-            $.when(deferred)
-                .fail(error.error, getGroupsCountFail)
-                .done(getGroupsCountDone);
-        }
+        $.when(deferred)
+            .fail(error.error, getBatchStatusFailed)
+            .done(getBatchStatusDone)
     }
 
-    function getTestsDone(response) {
+    function updateTestTable(response) {
         var columns;
-
-        // Internal wrapper to provide the href.
+        
         function _renderDetails(data, type) {
-            return ttest.renderDetails('/test/board/' + data + '/', type);
+            return ttest.renderDetails(
+                '/test/plan/id/' + data, type);
         }
 
-        // Internal wrapper to provide the oreder count.
-        function _renderGroupsCount(data, type) {
-            var rendered;
-
-            rendered = null;
-            if (type === 'display') {
-                rendered = ttest.countBadge({
-                    data: data,
-                    type: 'default',
-                    idStart: 'groups-',
-                    extraClasses: ['groups-count-badge']
-                });
-            } else if (type === 'sort') {
-                if (gGroupsCount.hasOwnProperty('groups-count-' + data)) {
-                    rendered = gGroupsCount['groups-count-' + data];
-                } else {
-                    rendered = NaN;
-                }
+        function _renderStatus(data, type) {
+            if (type == "display") {
+                var node = document.createElement('div');
+                node.id = 'status-' +data.board+'-'+data.kernel;
+                return node.outerHTML;
             }
-
-            return rendered;
-        }
-
-        // Internal wrapper to provide the oreder count.
-        function _renderLabsCount(data, type) {
-            var rendered;
-
-            rendered = null;
-            if (type === 'display') {
-                rendered = ttest.countBadge({
-                    data: data,
-                    type: 'default',
-                    idStart: 'labs-',
-                    extraClasses: ['labs-count-badge']
-                });
-            } else if (type === 'sort') {
-                if (gLabsCount.hasOwnProperty('labs-count-' + data)) {
-                    rendered = gLabsCount['labs-count-' + data];
-                } else {
-                    rendered = NaN;
-                }
-            }
-
-            return rendered;
         }
 
         if (response.length === 0) {
@@ -283,33 +123,92 @@ require([
         } else {
             columns = [
                 {
-                    data: 'board',
-                    title: 'Board',
+                    data: 'testPlan.job',
+                    title: 'Tree',
                     type: 'string',
-                    render: ttest.renderBoard
+                    className: 'tree-column',
                 },
                 {
-                    data: 'board',
-                    title: 'Total Test Groups',
-                    type: 'num',
+                    data: 'testPlan.git_branch',
+                    title: 'Branch',
+                    type: 'string',
                     searchable: false,
-                    className: 'pull-center',
-                    render: _renderGroupsCount
+                    className: 'branch-column',
                 },
                 {
-                    data: 'board',
-                    title: 'Total Unique Labs',
-                    type: 'num',
+                    data: 'testPlan.kernel',
+                    title: 'Kernel',
+                    type: 'string',
                     searchable: false,
-                    className: 'pull-center',
-                    render: _renderLabsCount
+                    className: 'kernel-column'
                 },
                 {
-                    data: 'board',
-                    title: '',
+                    data: 'testPlan.defconfig_full',
+                    title: 'Defconfig',
                     type: 'string',
                     searchable: false,
                     orderable: false,
+                    className: 'defconfig-column',
+                },
+                {
+                    data: 'testPlan.build_environment',
+                    title: 'Compiler',
+                    type: 'string',
+                    searchable: false,
+                    orderable: false,
+                    className: 'build-column',
+                },
+                {
+                    data: 'testPlan.arch',
+                    title: 'Architecture',
+                    type: 'string',
+                    searchable: false,
+                    orderable: false,
+                    className: 'type-column',
+                },
+                {
+                    data: 'testPlan.device_type',
+                    title: 'Device Type',
+                    type: 'string',
+                    searchable: false,
+                    className: 'device-column',
+                },
+                {
+                    data: 'testPlan.lab_name',
+                    title: 'Lab',
+                    type: 'string',
+                    searchable: false,
+                    orderable: false,
+                    className: 'lab-column',
+                },
+                {
+                    data: 'testPlan.name',
+                    title: 'Test Plan',
+                    type: 'string',
+                    className: 'plan-column',
+                },
+                {
+                    data: 'testPlan.created_on',
+                    title: 'Date',
+                    type: 'date',
+                    className: 'date-column',
+                    render: ttest.renderDate
+                },
+                {
+                    data: 'testPlan',
+                    title: 'Status',
+                    type: 'string',
+                    searchable: false,
+                    orderable: false,
+                    className: 'pull-center',
+                    render: _renderStatus,
+                },
+                {
+                    data: 'testPlan._id.$oid',
+                    title: 'Plan Details',
+                    type: 'string',
+                    orderable: false,
+                    searchable: false,
                     className: 'select-column pull-center',
                     render: _renderDetails
                 }
@@ -320,8 +219,8 @@ require([
                 .columns(columns)
                 .order([0, 'asc'])
                 .languageLengthMenu('Tests per page')
-                .rowURL('/test/board/%(board)s/')
-                .rowURLElements(['board'])
+                .rowURL('/test/plan/id/%(_id)s/')
+                .rowURLElements(['_id'])
                 .draw();
         }
     }
@@ -330,6 +229,11 @@ require([
         gTestsTable
             .pageLen(gPageLen)
             .search(gSearchFilter);
+    }
+
+    function getTestsDone(response){
+        updateTestTable(response);
+        getBatchStatus(response);
     }
 
     function getTestsParse(response) {
@@ -342,10 +246,9 @@ require([
             }
             return false;
         }
-
         // Convert a value into an object.
         function _toObject(data) {
-            return {board: data};
+            return {testPlan: data.result};
         }
 
         results = response.result;
@@ -354,8 +257,6 @@ require([
             results = results.map(_toObject);
         }
         setTimeout(getTestsDone.bind(null, results), 25);
-        setTimeout(getGroupsCount.bind(null, results), 25);
-        setTimeout(getLabsCount.bind(null, results), 25);
         setTimeout(enableSearch, 25);
     }
 
@@ -371,13 +272,16 @@ require([
         var reqData;
 
         reqData = {
+            aggregate: 'board',
+            parent_id: 'null',
             sort: 'created_on',
             sort_order: -1,
             date_range: gDateRange,
             limit: appconst.MAX_QUERY_LIMIT,
+            distinct: 'kernel',
         }
 
-        deferred = request.get('/_ajax/group/distinct/board/', reqData);
+        deferred = request.get('/_ajax/test/group', reqData);
         $.when(deferred)
             .fail(error.error, getTestsFail)
             .done(getTestsParse);
@@ -401,6 +305,7 @@ require([
 
     setTimeout(getTests, 10);
 
-    init.hotkeys();
-    init.tooltip();
+    setTimeout(init.hotkeys, 50);
+    setTimeout(init.tooltip, 50);
+
 });
