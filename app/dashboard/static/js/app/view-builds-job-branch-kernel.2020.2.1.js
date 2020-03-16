@@ -29,7 +29,6 @@ require([
     'charts/passpie',
     'utils/html',
     'utils/storage',
-    'utils/session',
     'utils/filter',
     'utils/date'
 ], function(
@@ -37,14 +36,13 @@ require([
         init,
         format,
         e,
-        r, u, commonBtns, buildBtns, chart, html, storage, session, filter) {
+        r, u, commonBtns, buildBtns, chart, html, storage, filter) {
     'use strict';
     var gBranch;
     var gFileServer;
     var gKernel;
     var gLogMessage;
     var gResultFilter;
-    var gSessionStorage;
     var gStorageName;
     var gTree;
 
@@ -68,19 +66,6 @@ require([
                 value.addEventListener(
                     'click', buildBtns.showHideWarnErr, true);
         });
-    }
-
-    function loadSavedSession() {
-        var isLoaded;
-
-        isLoaded = false;
-        gSessionStorage.load();
-
-        if (gSessionStorage.objects) {
-            isLoaded = session.load(gSessionStorage.objects);
-        }
-
-        return isLoaded;
     }
 
     function showFailedOnly() {
@@ -692,14 +677,12 @@ require([
             }
 
             setTimeout(function() {
-                if (!loadSavedSession()) {
-                    if (hasFailed) {
-                        showFailedOnly();
-                    } else {
-                        html.addClass(
-                            document.getElementById('all-btn'), 'active');
-                    }
-                }
+                if (hasFailed) {
+                    showFailedOnly();
+                } else {
+                    html.addClass(
+                        document.getElementById('all-btn'), 'active');
+                }                
             }, 0);
 
             // Bind buttons to the correct function.
@@ -1108,78 +1091,6 @@ require([
             .done(getJobDone, getLogs, getBuilds);
     }
 
-    function registerEvents() {
-        window.addEventListener('beforeunload', function() {
-            var pageState;
-
-            pageState = {};
-
-            function _saveElementState(element) {
-                pageState['#' + element.id] = [
-                    {
-                        type: 'class',
-                        name: 'class',
-                        value: element.getAttribute('class')
-                    },
-                    {
-                        type: 'attr',
-                        name: 'aria-expanded',
-                        value: element.getAttribute('aria-expanded')
-                    }
-                ];
-            }
-
-            // Unload the filters applied through the input box.
-            gResultFilter.unload();
-
-            pageState['.df-success'] = {
-                type: 'attr',
-                name: 'style',
-                value: html.attrBySelector('.df-success', 'style')
-            };
-            pageState['.df-failed'] = {
-                type: 'attr',
-                name: 'style',
-                value: html.attrBySelector('.df-failed', 'style')
-            };
-            pageState['.df-unknown'] = {
-                type: 'attr',
-                name: 'style',
-                value: html.attrBySelector('.df-unknown', 'style')
-            };
-            pageState['#all-btn'] = {
-                type: 'class',
-                name: 'class',
-                value: html.attrById('all-btn', 'class')
-            };
-            pageState['#success-btn'] = {
-                type: 'class',
-                name: 'class',
-                value: html.attrById('success-btn', 'class')
-            };
-            pageState['#fail-btn'] = {
-                type: 'class',
-                name: 'class',
-                value: html.attrById('fail-btn', 'class')
-            };
-            pageState['#unknown-btn'] = {
-                type: 'class',
-                name: 'class',
-                value: html.attrById('unknown-btn', 'class')
-            };
-
-            Array.prototype.forEach.call(
-                document.querySelectorAll('[id^="panel-defconf"]'),
-                _saveElementState);
-
-            Array.prototype.forEach.call(
-                document.querySelectorAll('[id^="collapse-defconf"]'),
-                _saveElementState);
-
-            gSessionStorage.addObjects(pageState).save();
-        });
-    }
-
     Array.prototype.forEach.call(
         document.querySelectorAll('.btn-group > .btn'),
         function(btn) {
@@ -1223,11 +1134,9 @@ require([
         gStorageName += 'latest';
     }
 
-    gSessionStorage = storage(gStorageName);
     gResultFilter = filter('data-filter');
 
     setTimeout(getJob.bind(null, gTree, gBranch, gKernel), 10);
-    setTimeout(registerEvents, 25);
 
     setTimeout(init.hotkeys, 50);
     setTimeout(init.tooltip, 50);
