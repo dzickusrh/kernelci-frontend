@@ -49,7 +49,7 @@ class TestGenericView(View):
 class TestsAllView(TestGenericView):
 
     def dispatch_request(self):
-        body_title = "Available Test Group Reports"
+        body_title = "Available Test Results"
         search_filter, page_len = get_search_parameters(request)
 
         return render_template(
