@@ -55,21 +55,6 @@ require([
         document.getElementById('li-build').setAttribute('class', 'active');
     }, 15);
 
-    function bindDetailButtons() {
-        Array.prototype.forEach.call(
-            document.getElementsByClassName('click-btn'),
-            function(value) {
-                value.addEventListener(
-                    'click', commonBtns.showHideElements, true);
-        });
-        Array.prototype.forEach.call(
-            document.getElementsByClassName('warn-err-btn'),
-            function(value) {
-                value.addEventListener(
-                    'click', buildBtns.showHideWarnErr, true);
-        });
-    }
-
     function loadSavedSession() {
         var isLoaded;
 
@@ -691,19 +676,43 @@ require([
                     .getElementById('unknown-btn').removeAttribute('disabled');
             }
 
-            setTimeout(function() {
-                if (!loadSavedSession()) {
-                    if (hasFailed) {
-                        showFailedOnly();
-                    } else {
-                        html.addClass(
-                            document.getElementById('all-btn'), 'active');
-                    }
-                }
-            }, 0);
-
             // Bind buttons to the correct function.
-            setTimeout(bindDetailButtons, 0);
+            function Bind(){
+                return new Promise ( resolve => {
+                    setTimeout(() => {
+                        Array.prototype.forEach.call(
+                            document.getElementsByClassName('click-btn'),
+                            function(value) {
+                                value.addEventListener(
+                                    'click', commonBtns.showHideElements, true);
+                        });
+                        Array.prototype.forEach.call(
+                            document.getElementsByClassName('warn-err-btn'),
+                            function(value) {
+                                value.addEventListener(
+                                    'click', buildBtns.showHideWarnErr, true);
+                        });
+                        resolve(true);
+                    }, 1000);
+                });
+            }
+
+            async function buildTable() {
+                const result = await Bind();
+                if(result){
+                    setTimeout(function() {
+                        if (!loadSavedSession()) {
+                            if (hasFailed) {
+                                showFailedOnly();
+                            } else {
+                                html.addClass(
+                                    document.getElementById('all-btn'), 'active');
+                            }
+                        }
+                    }, 0);
+                }
+            }
+            buildTable();
         }
     }
 
@@ -1226,8 +1235,8 @@ require([
     gSessionStorage = storage(gStorageName);
     gResultFilter = filter('data-filter');
 
-    setTimeout(getJob.bind(null, gTree, gBranch, gKernel), 10);
     setTimeout(registerEvents, 25);
+    setTimeout(getJob.bind(null, gTree, gBranch, gKernel), 10);
 
     setTimeout(init.hotkeys, 50);
     setTimeout(init.tooltip, 50);
